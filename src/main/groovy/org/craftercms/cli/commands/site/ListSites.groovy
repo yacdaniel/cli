@@ -14,13 +14,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.craftercms.cli.options
+package org.craftercms.cli.commands.site
 
+import org.craftercms.cli.commands.AbstractCommand
 import picocli.CommandLine
 
-class SiteOptions {
+@CommandLine.Command(name = 'list-sites', description = 'List the sites that the current user can access')
+class ListSites extends AbstractCommand {
 
-    @CommandLine.Option(names = ['-s', '--siteId'], required = true, description = 'The id of the site')
-    String siteId
+    def run(client) {
+        client.get {
+            request.uri.path = '/studio/api/2/users/me/sites.json'
+        }.with {
+            if (sites) {
+                sites.each {
+                    println " ${it.name} (${it.siteId})"
+                }
+            } else {
+                println "There are no sites"
+            }
+        }
+    }
 
 }

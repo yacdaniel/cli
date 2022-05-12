@@ -14,22 +14,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.craftercms.cli.commands
+package org.craftercms.cli.commands.site
 
-import org.craftercms.cli.options.RemoteOptions
+import org.craftercms.cli.commands.AbstractCommand
 import org.craftercms.cli.options.SiteOptions
 import picocli.CommandLine
 
-abstract class AbstractSyncCommand extends AbstractCommand {
+@CommandLine.Command(name = 'list-remotes', description = 'List the remote repositories of a site')
+class ListRemotes extends AbstractCommand {
 
     @CommandLine.Mixin
     SiteOptions siteOptions
 
-    @CommandLine.Mixin
-    RemoteOptions remoteOptions
-
-    def additionalValidations() {
-        remoteOptions.validateAll()
+    def run(client) {
+        client.get {
+            request.uri.path = '/studio/api/2/repository/list_remotes.json'
+            request.uri.query = [siteId: siteOptions.siteId]
+        }.with {
+            if (remotes) {
+                remotes.each {
+                    println " ${it.name} (${it.url})"
+                    it.branches.each {
+                        println " - ${it}"
+                    }
+                }
+            } else {
+                println "There are no remote repositories"
+            }
+        }
     }
 
 }
